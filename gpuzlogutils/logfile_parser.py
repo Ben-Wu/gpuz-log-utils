@@ -3,8 +3,25 @@ import os
 from argparse import ArgumentParser
 
 
-def parse_logs(directory, fieldnames=None, log_to_read=None):
-    log_files = log_to_read or os.listdir(directory)
+def parse_logs(directory=None, fieldnames=None, log_to_read=None,
+               skip_first=False):
+    """Gets all the lines of all the csv's in a directory or reads
+        from a single file
+
+    :param directory: path to directory with csv's;
+        will only read given file if None
+    :param fieldnames: names of columns in csv;
+        will read column names from csv if None
+    :param log_to_read: path to single log file to read
+    :yield: line of csv as a dict
+    """
+    if directory is None and log_to_read is None:
+        raise ValueError('either path to directory to read from or '
+                         'path to log file must be given')
+
+    log_files = (log_to_read or
+                 [f for f in os.listdir(directory) if
+                  f.endswith('.csv') or f.endswith('.txt')])
 
     for log_file in log_files:
         with open(log_to_read or os.path.join(directory, log_file)) as f:
@@ -13,10 +30,11 @@ def parse_logs(directory, fieldnames=None, log_to_read=None):
             # clean up fieldnames
             fieldnames = [f.strip().replace(' ', '') for
                           f in reader.fieldnames]
-
             reader.fieldnames = fieldnames
+            if skip_first:
+                reader.__next__()
             for line in reader:
-                yield line
+                yield dict(line)
 
 
 def parse_args():
