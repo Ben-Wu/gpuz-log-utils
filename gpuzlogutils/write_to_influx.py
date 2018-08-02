@@ -4,32 +4,6 @@ from datetime import datetime
 
 from influxdb import InfluxDBClient
 
-from gpuzlogutils.logfile_parser import parse_logs
-
-
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument('--hostname', default='localhost')
-    parser.add_argument('--port', type=int, default=8086)
-    parser.add_argument('--database', default='gpuz')
-    parser.add_argument('-d', '--directory')
-    parser.add_argument('-f', '--log-file')
-    parser.add_argument('-g', '--gpu-name', required=True)
-    parser.add_argument('--fieldnames', nargs='+')
-    parser.add_argument('--batch-size', type=int, default=1)
-
-    return parser.parse_args()
-
-
-def influx_data_point(measurement, gpu_name, fields, timestamp):
-    return {
-        'measurement': measurement,
-        'tags': {'gpuName': gpu_name},
-        'fields': fields,
-        'time': timestamp
-    }
-
-
 if __name__ == '__main__':
     args = parse_args()
 
@@ -67,3 +41,29 @@ if __name__ == '__main__':
 
     if len(point_buffer) > 0:
         influx.write_points(point_buffer)
+        
+        
+from gpuzlogutils.logfile_parser import parse_logs
+
+
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('--hostname', default='localhost')
+    parser.add_argument('--port', type=int, default=8086)
+    parser.add_argument('--database', default='gpuz')
+    parser.add_argument('-d', '--directory')
+    parser.add_argument('-f', '--log-file')
+    parser.add_argument('-g', '--gpu-name', required=True)
+    parser.add_argument('--fieldnames', nargs='+')
+    parser.add_argument('--batch-size', type=int, default=1)
+
+    return parser.parse_args()
+
+
+def influx_data_point(measurement, gpu_name, fields, timestamp):
+    return {
+        'measurement': measurement,
+        'tags': {'gpuName': gpu_name},
+        'fields': fields,
+        'time': timestamp
+    }
